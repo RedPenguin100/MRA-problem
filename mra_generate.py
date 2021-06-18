@@ -10,7 +10,7 @@ def generate_data(x: np.array, N, sigma):
     """
     L = x.size
     group_members = np.random.randint(0, L, N)
-    noise = np.random.normal(scale=np.power(sigma, 2.0), size=(N, L))
+    noise = np.random.normal(scale=sigma, size=(N, L))
     data = np.zeros((N, L))
 
     for i in range(N):
@@ -33,15 +33,32 @@ def signal_mean_from_data(data):
 
 
 def signal_power_spectrum_from_data(data):
-    pass
+    global sigma
+    global L
+    power_spectra = np.power(np.abs(np.fft.fft(data)), 2.0) - np.power(sigma, 2.0) * L
+    return np.mean(power_spectra, axis=0)
 
 
-sigma = 1
-arr = np.array([14123, 11123, -23213, 55551, 96044])
+arr = np.array([1, 2, 3, 4, 5, 6])
 mean = np.mean(arr)
-data = generate_data(arr, 100000, sigma)
-print(signal_mean_from_data(data[:10]) - mean)
-print(signal_mean_from_data(data[:100]) - mean)
-print(signal_mean_from_data(data[:1000]) - mean)
-print(signal_mean_from_data(data[:10000]) - mean)
-print(signal_mean_from_data(data[:100000]) - mean)
+N = 1000000
+L = len(arr)
+sigma = 0
+real_ps = signal_power_spectrum_from_data(arr.reshape((1, 6)))
+print(real_ps)
+sigma = 2
+data = generate_data(arr, N, sigma)
+
+print(signal_power_spectrum_from_data(data[:10]) - real_ps)
+print(signal_power_spectrum_from_data(data[:100]) - real_ps)
+print(signal_power_spectrum_from_data(data[:1000]) - real_ps)
+print(signal_power_spectrum_from_data(data[:10000]) - real_ps)
+print(signal_power_spectrum_from_data(data[:100000]) - real_ps)
+print(signal_power_spectrum_from_data(data[:1000000]) - real_ps)
+# errors = np.zeros(N)
+#
+# for i in range(N // 20, len(errors)):
+#     errors[i] = np.linalg.norm(signal_mean_from_data(data[:i + 1]) - mean)
+#
+# plt.plot(range(N), errors, 'r--')
+# plt.show()
